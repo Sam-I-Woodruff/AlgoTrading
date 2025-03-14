@@ -34,6 +34,7 @@ for ticker in tickers:
     #Checking if file exists and/or is empty
     if not os.path.exists(file_path):
         print("File does not exist, and will be created later")
+        last_date = "" #This is to start fresh if empty.
     else: #Seeing how big the file is
         csv_file = open(file_path)
         lines = csv_file.readlines()
@@ -45,10 +46,10 @@ for ticker in tickers:
         else:
             print(f"Size of file {ticker}.csv is {size}")
     
-    
     new_lines = []
     for date in req_dict[key1]:
         if date == last_date:
+            print(f"{ticker} is up to date")
             break
         #print(date + "," + req_dict[key1][date][key2]) #print key, value
         new_lines.append(date + "," + req_dict[key1][date][key2]+"\n")
@@ -58,31 +59,4 @@ for ticker in tickers:
     csv_file.writelines(new_lines) # appending new data
     csv_file.close()
 
-    # Extracting time series data
-    # time_series_key = "Time Series (Daily)"
-    
-    # if time_series_key in data:
-    #     time_series = data[time_series_key]
-
-    #     # Convert to DataFrame
-    #     df = pd.DataFrame.from_dict(time_series, orient='index')
-    #     df = df.astype(float)  # Convert string values to float
-    #     df.index = pd.to_datetime(df.index)  # Convert index to datetime
-    #     df.sort_index(inplace=True)  # Ensure correct order
-
-    #     # Plot closing prices
-    #     plt.figure(figsize=(10, 5))
-    #     plt.plot(df.index, df['4. close'], marker='o', linestyle='-')
-    #     plt.xlabel('Date')
-    #     plt.ylabel('Close Price')
-    #     plt.title(f'Closing Prices for {ticker}')
-    #     plt.xticks(rotation=45)
-    #     plt.grid()
-
-    #     # Show the plot
-    #     plt.show()
-
-# print(data['Time Series (5min)'])
-
-    print(json.dumps(data, indent=4))
     time.sleep(15)

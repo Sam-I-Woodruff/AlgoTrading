@@ -4,18 +4,8 @@ import time
 import os
     
 def append():
-    # 1. connect to the following web json api url: https://api.datamuse.com/words?ml=duck&sp=b*&max=5
-    #  - download the json
-    #  - convert it to a Python dictionary
-    #  - save it to a json file permanently
-    
-    # 2. starting with the code you wrote in the programming activity 1
-    #  - go through the python dictionary and take all of the scores (each word has a score)
-    #  - append the score to a list, and print the average of the list
-    
-    # [{"word": "bird", "score": 67510, "tags": ["n"]}, 
-        # {"word": "bugger", "score": 57534, "tags": ["n"]}, 
-        # {"word": "brunt", "score": 52433, "tags": ["n"]}]
+
+
     
     ticker = 'AAPL'
     url = 'http://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol='+ticker+'&outputsize=full&apikey=NG9C9EPVYBMQT0C8'
