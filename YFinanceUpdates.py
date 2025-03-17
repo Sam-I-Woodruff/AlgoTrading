@@ -15,7 +15,6 @@ def get_last_weekday():
 
     return last_weekday.strftime('%Y-%m-%d')
 
-start_date = "2014-03-17"  # Default start date if no file exists
 end_date = get_last_weekday()
 
 folder_path = 'C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinance\\'
@@ -26,6 +25,8 @@ tickers = tickers_df['Tickers'].tolist()
 os.makedirs(folder_path, exist_ok=True)
 
 for ticker in tickers:
+
+    start_date = "2014-03-17"  # Default start date if no file exists. Defined here in case previous ticker ran with a different one.
 
     file_path = os.path.join(folder_path, f"{ticker}.csv")
 
@@ -53,5 +54,3 @@ for ticker in tickers:
         print(f"Updated {ticker} data in {file_path} from start date of {start_date}")
     else:
         print(f"No new data for {ticker}")
-
-    time.sleep(5)
