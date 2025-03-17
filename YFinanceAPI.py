@@ -3,25 +3,39 @@ import pandas as pd
 import time
 import os
 
-# Define the ticker symbol and the period for the data
-# ticker_symbol = 'AAPL'  # Change to your desired ticker
-start_date = '2014-09-30'  # 10 years ago from today
-end_date = '2024-09-30'  # Today's date
+# Define the date range
+start_date = '2014-09-30'
+end_date = '2024-09-30'
 
-folder_path = 'C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinanceHistorical\\'
-
-tickers_df = pd.read_csv('C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\50Tickers.csv')
+folder_path = 'C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinanceTenYears\\'
+tickers_df = pd.read_csv('C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\Tickers\\50Tickers.csv')
 tickers = tickers_df['Tickers'].tolist()
 
+failed_tickers = []
+
 for ticker in tickers:
-    # Fetch historical daily data
-    data = yf.download(ticker, start=start_date, end=end_date, interval='1d')
+    try:
+        # Fetch historical data
+        data = yf.download(ticker, start=start_date, end=end_date, interval='1d', progress=False)
 
-    # Display the first few rows of the data
-    print(data.head())
+        # Check if data is empty
+        if data.empty:
+            print(f"Failed to download: {ticker} (empty data)")
+            failed_tickers.append(ticker)
+            continue
 
-    # Optionally, save to a CSV file
-    data.to_csv(f'{ticker}_daily_data.csv')
-    data.to_csv(os.path.join(folder_path, f'{ticker}_daily_data.csv'))
+        # Save to CSV
+        csv_path = os.path.join(folder_path, f'{ticker}_daily_data.csv')
+        data.to_csv(csv_path)
+        print(f"Saved {ticker} data to {csv_path}")
 
-    time.sleep(10)
+    except Exception as e:
+        print(f"Failed to get ticker '{ticker}' due to: {e}")
+        failed_tickers.append(ticker)
+
+    # Pause to prevent rate limiting
+    time.sleep(2)
+
+# Log failed tickers
+if failed_tickers:
+    print("\nFailed tickers:", failed_tickers)
