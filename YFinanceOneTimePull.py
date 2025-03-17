@@ -23,8 +23,7 @@ for ticker in tickers:
     else:
         print(f"No data found for {ticker}")
 
-    # print(historical_data[['Open', 'High', 'Low', 'Close', 'Volume']])
-    print(historical_data[['Close']])
+    
 
     # time.sleep(1)
 
