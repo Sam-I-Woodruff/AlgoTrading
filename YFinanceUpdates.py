@@ -5,17 +5,7 @@ import time
 import os
 from datetime import datetime, timedelta
 
-
-def get_last_weekday():
-    today = datetime.today()
-    last_weekday = today - timedelta(days=1)  # Start with yesterday
-
-    while last_weekday.weekday() > 4:  # 0=Monday, 4=Friday, 5=Saturday, 6=Sunday
-        last_weekday -= timedelta(days=1)  # Keep going back if it's Saturday/Sunday
-
-    return last_weekday.strftime('%Y-%m-%d')
-
-end_date = get_last_weekday()
+end_date = datetime.today().strftime('%Y-%m-%d')
 
 folder_path = 'C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinance\\'
 tickers_df = pd.read_csv('C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\Tickers\\50Tickers.csv')
