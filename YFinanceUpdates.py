@@ -5,7 +5,29 @@ import time
 import os
 from datetime import datetime, timedelta
 
-end_date = datetime.today().strftime('%Y-%m-%d')
+# Function to get last valid market day
+def get_last_market_day():
+    nyse = mcal.get_calendar('NYSE')
+    today = datetime.today().date()
+    
+    # Get market holidays and trading days
+    valid_days = nyse.valid_days(start_date=(today - timedelta(days=10)).strftime('%Y-%m-%d'), 
+                                 end_date=today.strftime('%Y-%m-%d'))
+    
+    # Convert to list of dates
+    valid_days = pd.to_datetime(valid_days).date.tolist()
+    
+    # Find last trading day (excluding today)
+    for i in range(len(valid_days) - 1, -1, -1):
+        if valid_days[i] < today:
+            return valid_days[i].strftime('%Y-%m-%d')
+
+    return None  # Fallback, should never reach here
+
+# Get last valid market day
+end_date = get_last_market_day()
+
+# end_date = datetime.today().strftime('%Y-%m-%d')
 
 folder_path = 'C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinance\\'
 tickers_df = pd.read_csv('C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\Tickers\\50Tickers.csv')
