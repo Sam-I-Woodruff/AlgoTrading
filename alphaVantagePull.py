@@ -54,7 +54,7 @@ for ticker in tickers:
         #print(date + "," + req_dict[key1][date][key2]) #print key, value
         new_lines.append(date + "," + req_dict[key1][date][key2]+"\n")
         
-    new_lines = new_lines[::-1]
+    new_lines = new_lines[::-1] #Reverse order so oldest date is at the bottom.
     csv_file = open(file_path, "a") # opening the file to append data
     csv_file.writelines(new_lines) # appending new data
     csv_file.close()
