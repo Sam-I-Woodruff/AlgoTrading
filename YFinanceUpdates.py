@@ -17,15 +17,13 @@ def get_last_market_day():
     # Convert to list of dates
     valid_days = pd.to_datetime(valid_days).date.tolist()
 
-    # If today is a valid trading day, return the last one before today
-    if today in valid_days:
-        return valid_days[-2].strftime('%Y-%m-%d')  # Second to last day
+    # if today not in valid_days:
+    #     return valid_days[-2].strftime('%Y-%m-%d')  # Second to last day
     
-    # Otherwise, return the last trading day
-    return valid_days[-1].strftime('%Y-%m-%d')
+    return valid_days[-1].strftime('%Y-%m-%d'), valid_days[-2].strftime('%Y-%m-%d')
 
 # Get last valid market day
-end_date = get_last_market_day()
+end_date, second_to_end_date = get_last_market_day()
 
 # end_date = datetime.today().strftime('%Y-%m-%d')
 
@@ -38,7 +36,7 @@ os.makedirs(folder_path, exist_ok=True)
 
 for ticker in tickers:
 
-    start_date = "2022-03-17"  # Default start date if no file exists. Defined here in case previous ticker ran with a different one.
+    start_date = "2022-03-22"  # Default start date if no file exists. Defined here in case previous ticker ran with a different one.
 
     file_path = os.path.join(folder_path, f"{ticker}.csv")
 
@@ -47,7 +45,7 @@ for ticker in tickers:
         existing_data = pd.read_csv(file_path, index_col=0)
         if not existing_data.empty:
             last_date_in_file = pd.to_datetime(existing_data.index[-1])  # Explicitly convert to datetime
-            start_date = last_date_in_file.strftime('%Y-%m-%d')  # Start from next day
+            start_date = last_date_in_file.strftime('%Y-%m-%d')
         else:
             print(f"{ticker} CSV exists but is empty, fetching full data.")
 
@@ -56,7 +54,16 @@ for ticker in tickers:
         continue #Immediately end this ticker and move on to next
 
     print(f"Fetching data for {ticker} from {start_date} to {end_date}")
-    new_data = yf.download(ticker, start=start_date, end=end_date)
+
+    adjusted_end_date = (datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    adjusted_second_to_end_date = (datetime.strptime(second_to_end_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+
+    try:
+        # Ensure end_date is a datetime object before adding a day
+        new_data = yf.download(ticker, start=start_date, end=adjusted_end_date)
+    except:
+        # Ensure second_to_end_date is a datetime object before adding a day
+        new_data = yf.download(ticker, start=start_date, end=adjusted_second_to_end_date)
 
     if not new_data.empty:
         if os.path.exists(file_path):
