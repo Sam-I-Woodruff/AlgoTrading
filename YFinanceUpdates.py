@@ -16,13 +16,13 @@ def get_last_market_day():
     
     # Convert to list of dates
     valid_days = pd.to_datetime(valid_days).date.tolist()
-    
-    # Find last trading day (excluding today)
-    for i in range(len(valid_days) - 1, -1, -1):
-        if valid_days[i] < today:
-            return valid_days[i].strftime('%Y-%m-%d')
 
-    return None  # Fallback, should never reach here
+    # If today is a valid trading day, return the last one before today
+    if today in valid_days:
+        return valid_days[-2].strftime('%Y-%m-%d')  # Second to last day
+    
+    # Otherwise, return the last trading day
+    return valid_days[-1].strftime('%Y-%m-%d')
 
 # Get last valid market day
 end_date = get_last_market_day()
@@ -47,7 +47,7 @@ for ticker in tickers:
         existing_data = pd.read_csv(file_path, index_col=0)
         if not existing_data.empty:
             last_date_in_file = pd.to_datetime(existing_data.index[-1])  # Explicitly convert to datetime
-            start_date = (last_date_in_file + timedelta(days=1)).strftime('%Y-%m-%d')  # Start from next day
+            start_date = last_date_in_file.strftime('%Y-%m-%d')  # Start from next day
         else:
             print(f"{ticker} CSV exists but is empty, fetching full data.")
 
