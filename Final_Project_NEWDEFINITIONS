@@ -60,7 +60,7 @@ for i in tickers: #iterates through each ticker
     # for line in lines:
     #     prices.append(float(line.split(",")[1]))
 
-    df = pd.read_csv(f"C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinance{i}.csv")
+    df = pd.read_csv(f"C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinance\\{i}.csv")
     prices = df.iloc[:, 1].tolist()
 
     count = len(prices)
