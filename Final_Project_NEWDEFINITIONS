@@ -1,0 +1,69 @@
+import requests
+import json
+import time
+import os
+import alpaca_trade_api as tradeapi
+import pandas as pd
+
+
+folder_path = 'C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinance\\'
+tickers_df = pd.read_csv('C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\Tickers\\50Tickers.csv')
+tickers = tickers_df['Tickers'].tolist()
+
+def meanReversionStrategy(prices, t):
+    # establishing all variables below
+    buy = 0
+    first_buy = 0
+    profit = 0
+    profit_each = 0
+    five_day_average = 0
+    buy_checker = 0
+    buy_today = 0
+    
+    for i in range(count): #looping through all indeces of prices
+        if i >= 5: #Has moving average initiate at index 0
+            current_price = prices[5] #resets price for each loop iteration 
+            five_day_average = (prices[-1+i] + prices[-2+i] + prices[-3+i] + prices[-4+i] + prices [-5+i])/5 #calculates 5-day moving average
+            if current_price < five_day_average * .98 and buy == 0: #buy
+                if current_price == prices[5]: #uses the first iteration from our csv list of prices to get today's price.
+                    continue
+                    alpacaBuy(t)
+                if buy_checker == 0: #steps into if first buy
+                    first_buy = current_price
+                    buy_checker = 1 #assigns sentinal for this if statemtn
+                buy = current_price #performs buying aspect
+                print("Buy at: ", round(buy, 2))
+            elif current_price > five_day_average * 1.02 and buy != 0: #sell
+                if current_price == prices[5]: #uses the first iteration from our csv list of prices to get today's price.
+                    continue
+                    alpacaSell(t)
+                profit += (current_price - buy)  #calculates total profit
+                profit_each = current_price - buy 
+                buy = 0; #allows aspect of buying again
+                print("Sell at: ", round(current_price, 2))
+                print("Trade Profit = ", round(profit_each, 2))
+            else:
+                pass
+    
+    final_profit_percentage = round((profit/first_buy) * 100, 2) #calcs profit percentage
+    print("---------------------------------\nTotal profit: ", round(profit, 2))
+    print("First Buy: ", round(first_buy, 2))
+    print("Percentage Return: ", (final_profit_percentage), "%\n\n\n")
+    return profit, final_profit_percentage #returns both variables in the function
+
+for i in tickers: #iterates through each ticker
+    
+    # file = open("C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinance%s.csv"%(i))
+    # lines = file.readlines() 
+    
+    # prices = []
+    # for line in lines:
+    #     prices.append(float(line.split(",")[1]))
+
+    df = pd.read_csv(f"C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinance{i}.csv")
+    prices = df.iloc[:, 1].tolist()
+
+    count = len(prices)
+
+    print(i, " Mean Reversion Strategy")
+    mrprofit, mrreturns = meanReversionStrategy(prices, i)
