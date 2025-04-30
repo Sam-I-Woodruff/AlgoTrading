@@ -10,46 +10,103 @@ folder_path = 'C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinance\\'
 tickers_df = pd.read_csv('C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\Tickers\\50Tickers.csv')
 tickers = tickers_df['Tickers'].tolist()
 
-def meanReversionStrategy(prices, t):
-    # establishing all variables below
-    buy = 0
-    first_buy = 0
+
+# def meanReversionStrategy(prices, t):
+#     buy = 0
+#     first_buy = 0
+#     profit = 0
+#     buy_checker = 0
+#     buy_index = None  # To track the day of the buy
+
+
+#     for i in range(5, len(prices)):
+#         current_price = prices[i]
+#         five_day_average = sum(prices[i-5:i]) / 5
+
+#         if current_price < five_day_average * 0.98 and buy == 0:  # Buy condition
+#             if buy_checker == 0:
+#                 first_buy = current_price
+#                 buy_checker = 1
+#             buy = current_price
+#             buy_index = i #This is to count days since buy
+#             print("Buy at:", round(buy, 2))
+
+
+#         elif current_price > five_day_average * 1.02 and buy != 0:  # Sell condition
+#             profit_each = current_price - buy
+#             profit += profit_each
+#             hold_days = i - buy_index
+#             print("Sell at:", round(current_price, 2), f"(Held for {hold_days} days)")
+#             print("Trade Profit =", round(profit_each, 2))
+#             buy = 0  # Reset to allow next buy
+
+#     final_profit_percentage = round((profit / first_buy) * 100, 2) if first_buy != 0 else 0
+#     print("---------------------------------\nTotal profit:", round(profit, 2))
+#     print("First Buy:", round(first_buy, 2))
+#     print("Percentage Return:", final_profit_percentage, "%\n\n\n")
+#     return profit, final_profit_percentage
+
+
+def meanReversionStrategy(prices, ticker, window=5, threshold=0.02):
+    trades = []
+    position = None  # 'long' or 'short'
+    entry_price = 0
+    entry_index = 0
     profit = 0
-    profit_each = 0
-    five_day_average = 0
-    buy_checker = 0
-    buy_today = 0
-    
-    for i in range(count): #looping through all indeces of prices
-        if i >= 5: #Has moving average initiate at index 0
-            current_price = prices[5] #resets price for each loop iteration 
-            five_day_average = (prices[-1+i] + prices[-2+i] + prices[-3+i] + prices[-4+i] + prices [-5+i])/5 #calculates 5-day moving average
-            if current_price < five_day_average * .98 and buy == 0: #buy
-                if current_price == prices[5]: #uses the first iteration from our csv list of prices to get today's price.
-                    continue
-                    alpacaBuy(t)
-                if buy_checker == 0: #steps into if first buy
-                    first_buy = current_price
-                    buy_checker = 1 #assigns sentinal for this if statemtn
-                buy = current_price #performs buying aspect
-                print("Buy at: ", round(buy, 2))
-            elif current_price > five_day_average * 1.02 and buy != 0: #sell
-                if current_price == prices[5]: #uses the first iteration from our csv list of prices to get today's price.
-                    continue
-                    alpacaSell(t)
-                profit += (current_price - buy)  #calculates total profit
-                profit_each = current_price - buy 
-                buy = 0; #allows aspect of buying again
-                print("Sell at: ", round(current_price, 2))
-                print("Trade Profit = ", round(profit_each, 2))
-            else:
-                pass
-    
-    final_profit_percentage = round((profit/first_buy) * 100, 2) #calcs profit percentage
-    print("---------------------------------\nTotal profit: ", round(profit, 2))
-    print("First Buy: ", round(first_buy, 2))
-    print("Percentage Return: ", (final_profit_percentage), "%\n\n\n")
-    return profit, final_profit_percentage #returns both variables in the function
+    first_buy_price = None
+
+    for i in range(window, len(prices)):
+        current_price = prices[i]
+        moving_avg = sum(prices[i - window:i]) / window
+
+        # Long Entry
+        if position is None and current_price < moving_avg * (1 - threshold):
+            position = 'long'
+            entry_price = current_price
+            entry_index = i
+            if first_buy_price is None:
+                first_buy_price = current_price
+            print(f"Buy at: {round(current_price, 2)}")
+
+        # Long Exit
+        elif position == 'long' and current_price > moving_avg * (1 + threshold):
+            trade_profit = current_price - entry_price
+            profit += trade_profit
+            hold_days = i - entry_index
+            print(f"Sell at: {round(current_price, 2)} (Held for {hold_days} days)")
+            print(f"Trade Profit = {round(trade_profit, 2)}")
+            trades.append({'type': 'long', 'entry': entry_price, 'exit': current_price,
+                           'days_held': hold_days, 'profit': trade_profit})
+            position = None
+
+        # Short Entry
+        elif position is None and current_price > moving_avg * (1 + threshold):
+            position = 'short'
+            entry_price = current_price
+            entry_index = i
+            print(f"Short at: {round(current_price, 2)}")
+
+        # Short Exit
+        elif position == 'short' and current_price < moving_avg * (1 - threshold):
+            trade_profit = entry_price - current_price
+            profit += trade_profit
+            hold_days = i - entry_index
+            print(f"Cover at: {round(current_price, 2)} (Held for {hold_days} days)")
+            print(f"Short Trade Profit = {round(trade_profit, 2)}")
+            trades.append({'type': 'short', 'entry': entry_price, 'exit': current_price,
+                           'days_held': hold_days, 'profit': trade_profit})
+            position = None
+
+    final_return_pct = round((profit / first_buy_price) * 100, 2) if first_buy_price else 0
+
+    print("---------------------------------")
+    print("Ticker:", ticker)
+    print("Total profit:", round(profit, 2))
+    print("First Buy:", round(first_buy_price, 2) if first_buy_price else "N/A")
+    print("Percentage Return:", final_return_pct, "%\n")
+
+    return profit, final_return_pct, trades
+
 
 for i in tickers: #iterates through each ticker
     
@@ -60,7 +117,7 @@ for i in tickers: #iterates through each ticker
     # for line in lines:
     #     prices.append(float(line.split(",")[1]))
 
-    df = pd.read_csv(f"C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinance\\{i}.csv")
+    df = pd.read_csv(f"C:\\Users\\samwo\\Documents\\Code\\Algo_Trading\\YFinance\\{i}.csv", skiprows=3)
     prices = df.iloc[:, 1].astype(float).tolist() #Making them all a float then adding them to the list.
 
     count = len(prices)
